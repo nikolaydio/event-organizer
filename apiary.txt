@@ -1,0 +1,71 @@
+FORMAT: 1A
+
+# eventorg
+
+# Service api [/api]
+Notes related resources of the **Notes API**
+
+## Streams collection [/api/streams]
+
+### Create a stream [POST]
++ Request (application/json)
+
+        { "token": "user_token" }
+
++ Response 201 (application/json)
+
+        { "stream-token": "generated_token" }
+
+## Working with Streams [/api/streams/{token}]
+
++ Parameters
+    + token (required, `1234567890abcdef`) ... Unique string representing a view to a certain stream. It contains access level(read/write/delete) and an actual stream.
+
+### Get stream events  [GET]
++ Response 200 (application/json)
+    + Body
+
+            [{ "seq": 1, "value": { "msg": "Hello World" } },
+            { "seq": 2, "value": { "msg": "Second message" } }]
+
+### Delete stream [DELETE]
++ Response 204
+
+### Post event [POST]
+The entire json object you send here will be saved. When you access a certain event, the object will be available under the "value" attribute.
+
++  Request (application/json)
+    + Body
+    
+            { "msg": "Hello World" }
+
++ Response 201 (application/json)
+
+        { "id": 1, "msg": "Hello World" }
+        
+
+## Working with stream events [/api/streams/{token}/event/{seq}]
++ Parameters
+    + seq (required, number, `1`) ... Event sequence number. If the sequence number is not available yet then the request is blocked until it is received.
+
+
+### Read event [GET]
++ Response 200 (application/json)
+
+        { "seq": 1, "value": { "msg": "Hello World" } }
+        
+
+### Rewrite event [PUT]
+This cannot create new events. Each stream has a certain sequence number that is has reached. Writing to a seq number above that will result in error.
++  Request (application/json)
+    
+        { "msg": "Hello World" }
+
++ Response 200 (application/json)
+
+        { "seq": 1, "value": { "msg": "Hello World" } }
+        
+### Delete event [DELETE]
+Deleting an event will invalidate it's seq number. The only way to reuse that sequence number again is to Rewrite that event.
++ Response 204
+        
