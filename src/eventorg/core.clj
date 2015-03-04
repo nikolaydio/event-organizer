@@ -17,9 +17,9 @@
 
 (defroutes stream*
   (POST "/" [] "creating stream")
-  (GET "/:id" { params :form-params } (wrap-json-response stream/api-streams-get))
-  (POST "/:id" { params :form-params } (wrap-json-response stream/api-streams-post))
-  (GET "/:id/event/:num" request (wrap-json-response stream/api-streams-get-event)))
+  (GET "/:id" { params :form-params } (wrap-json-response #'stream/api-streams-get))
+  (POST "/:id" { params :form-params } (wrap-json-response #'stream/api-streams-post))
+  (GET "/:id/event/:seq" request (wrap-json-response #'stream/api-streams-get-event)))
 (defroutes users*
   (POST "/" { params :form-params } (wrap-json-response #({:key "creating user"})))
   (POST "/auth" { params :form-params } (wrap-json-response #({:key "authentication"})))

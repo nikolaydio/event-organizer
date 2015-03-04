@@ -7,7 +7,7 @@ $(document).ready(function(){
           msg: $("#event-text").val()
         }
       ).done(function(data) {
-        console.log(data.id);
+        console.log(data);
       });
     });
 
