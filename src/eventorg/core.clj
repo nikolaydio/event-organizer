@@ -5,14 +5,12 @@
   (:require (compojure handler route)
             [ring.util.response :as response]
             [eventorg.stream :as stream]
-            [compojure.]))
+            [ring.middleware.resource]))
 (use 'org.httpkit.server)
-
-(def working-data (atom {}))
 
 
 (defn home [r]
-  (wrap-resource your-handler "public/board.html"))
+  (ring.middleware.resource/wrap-resource #() "public/board.html"))
 
 
 
