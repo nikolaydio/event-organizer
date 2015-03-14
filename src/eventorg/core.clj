@@ -4,14 +4,15 @@
         [ring.util.response :only [response]])
   (:require (compojure handler route)
             [ring.util.response :as response]
-            [eventorg.stream :as stream]))
+            [eventorg.stream :as stream]
+            [compojure.]))
 (use 'org.httpkit.server)
 
 (def working-data (atom {}))
 
 
 (defn home [r]
-  "Hello World")
+  (wrap-resource your-handler "public/board.html"))
 
 
 
@@ -19,7 +20,7 @@
   (POST "/" [] "creating stream")
   (GET "/:id" { params :form-params } (wrap-json-response #'stream/api-streams-get))
   (POST "/:id" { params :form-params } (wrap-json-response #'stream/api-streams-post))
-  (GET "/:id/event/:seq" request (wrap-json-response #'stream/api-streams-get-event)))
+  (comment (GET "/:id/event/:seq" request (wrap-json-response #'stream/api-streams-get-event))))
 (defroutes users*
   (POST "/" { params :form-params } (wrap-json-response #({:key "creating user"})))
   (POST "/auth" { params :form-params } (wrap-json-response #({:key "authentication"})))

@@ -32,7 +32,7 @@
 (defn api-streams-post
   "Post a new event to a stream"
   [{req :params}]
-  (prn req)
+  "(prn req)"
   (if (get (first (get (-> (r/db db-name)
                            (r/table-db "streams")
                            (r/filter {:id (:id req) :write :true})
@@ -52,8 +52,8 @@
 (defn api-streams-get
   "Get all data in a stream"
   [{req :params}]
-  (prn req)
-  (response (:response (-> (r/db db-name)
+  "(prn req)"
+  (let [resp (-> (r/db db-name)
                           (r/table-db "events")
                           (r/filter (r/lambda [event]
                                               (r/>= (-> (r/db db-name)
@@ -62,14 +62,10 @@
                                                                       (r/and (r/= (r/get-field stream :user) (r/get-field event :user))
                                                                              (r/= (r/get-field stream :id) (:id req)))))
                                                   (r/count)) 1)))
-                          (run local-conn)))))
+                          (r/order-by (r/desc :time))
+                          (run local-conn))]
+    "(prn resp)"
+    (response (first (:response resp)))))
 
 
 
-(defn api-streams-get-event [request]
-  (let [r (:params request)]
-    (if-let [result (get-in @working-data [(:id r) (read-string (:num r))])]
-      result
-      (with-channel request channel
-            (swap! subscribers assoc [(:id r) (read-string (:num r))] channel))
-    )))
