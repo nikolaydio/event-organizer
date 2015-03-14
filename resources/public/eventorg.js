@@ -48,7 +48,17 @@ $(document).ready(function(){
       var tags = $("#tags");
       tags.empty();
       $.each(data, function(index, value) {
-        tags.append($("<span class=\"label label-primary\" style=margin-left:5px> ").text(value));
+        var tag = $("<span class=\"label label-primary\" style=margin-left:5px> ").text(value);
+        var move_to_selected = function() {
+          tag.click(move_to_other);
+          $("#selected-tags").append(tag);
+        };
+        var move_to_other = function() {
+          tag.click(move_to_selected);
+          tags.append(tag);
+        };
+        tag.click(move_to_selected);
+        tags.append(tag);
       });
     });
   }
