@@ -19,16 +19,24 @@
   (GET "/:id" { params :form-params } (wrap-json-response #'stream/api-streams-get))
   (POST "/:id" { params :form-params } (wrap-json-response #'stream/api-streams-post))
   (comment (GET "/:id/event/:seq" request (wrap-json-response #'stream/api-streams-get-event))))
+
+
+(defn tags [abc]
+  (prn "Hello World")
+  (response ["test1" "test2" "alarm" "mail" "urgent" "github" "etc"]))
+
 (defroutes users*
   (POST "/" { params :form-params } (wrap-json-response #({:key "creating user"})))
   (POST "/auth" { params :form-params } (wrap-json-response #({:key "authentication"})))
-  (GET "/:id" [] "Getting streams"))
+  (GET "/:id" [] "Getting streams123")
+  (GET "/:id/tags" [] (wrap-json-response tags)))
 
 (defroutes app*
   (GET "/" [] home)
   (context "/api" []
-    (context "/stream" [] #'stream*)
-    (context "/user" [] #'users*))
+    (context "/streams" [] #'stream*)
+    (context "/users" [] #'users*))
+  (POST "/auth" [] "success")
   (compojure.route/resources "/")
   (compojure.route/not-found "Sorry, nothing here..."))
 

@@ -2,7 +2,7 @@ $(document).ready(function(){
   "use strict"
 
   //General access data
-  var host = "http://private-5ee78-eventorg.apiary-mock.com";
+  var host = "";//"http://private-5ee78-eventorg.apiary-mock.com";
   var user = "dfb9153d-2172-41ba-900b-8f56106f6dc7";
   var read_stream = "dfb9153d-2172-41ba-900b-8f56106f6dc7";
   var write_stream = "f3be18bf-408f-451f-8d10-e2fee82bb1a9";
@@ -36,7 +36,7 @@ $(document).ready(function(){
   function render_msg(elem) {
     var jq = $("<div>").attr("class", "alert alert-warning");
     var add = "";
-    if(elem.value.msg) {
+    if(elem.value.msg != null) {
       add = elem.value.msg;
     }else{
       add = elem.value;
@@ -45,7 +45,6 @@ $(document).ready(function(){
     $.each(elem.tags, function(index, v) {
       jq.append($("<span>").attr("class", "label label-primary").attr("style", "margin-left:5px").text(v));
     });
-    console.log(jq);
     return jq;
   }
 
@@ -88,6 +87,7 @@ $(document).ready(function(){
     //Updating tags
   function update_tags() {
     $.get(host + "/api/users/" + user + "/tags").then(function(data) {
+      console.log(data);
       var tags = $("#tags");
       tags.empty();
       $.each(data, function(index, value) {
