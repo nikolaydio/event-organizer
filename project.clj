@@ -7,7 +7,8 @@
                  [compojure "1.3.2"]
                  [ring/ring-json "0.3.1"]
                  [http-kit "2.1.18"]
-                 [revise "0.0.6"]]
+                 [revise "0.0.6"]
+                 [com.cemerick/friend "0.2.1"]]
   :main ^:skip-aot eventorg.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
