@@ -50,7 +50,7 @@
   (GET "/login" request login-page)
   (GET "/authorized" request
        (prn request)
-       (friend/identity request))
+       (response (friend/identity request)))
   (friend/logout (GET "/logout" [] (ring.util.response/redirect "/")))
   (context "/api" []
     (context "/streams" [] #'stream*)
