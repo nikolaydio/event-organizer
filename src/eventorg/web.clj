@@ -1,4 +1,4 @@
-(ns eventorg.core
+(ns eventorg.web
   (:use [compojure.core :only (GET PUT POST defroutes context)])
   (:use [ring.middleware.json :only [wrap-json-response wrap-json-body]]
         [ring.util.response :only [response]])
