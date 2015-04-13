@@ -10,7 +10,7 @@ $(document).ready(function(){
 
   //Updating data in data explorer
   function update_content_data() {
-    $.get(host + "/api/streams/" + read_stream).then(function(data) {
+    $.get(host + "/api/user/feed").then(function(data) {
       loaded_msgs = data;
       render_data();
     })
@@ -19,13 +19,14 @@ $(document).ready(function(){
 
 
   update_content_data();
-  setInterval(update_content_data,5000);
+  setInterval(update_content_data,50000);
 
   //adding new messages
   $("#send-msg").click(function(){
-    $.post(host + "/api/streams/" + write_stream,
+    $.post(host + "/api/user/feed",
            {
-             msg: $("#content-msg").val()
+             "tags": get_tags(),
+             "value": { "msg": $("#content-msg").val() }
            }
           ).done(function(data) {
       $("#content-msg").val("");

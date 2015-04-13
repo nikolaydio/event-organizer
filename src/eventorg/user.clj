@@ -25,5 +25,9 @@
                             friend/current-authentication
                             :id
                             (#'persist/get-feed))))
+  (POST "/feed" request  (-> (friend/identity request)
+                            friend/current-authentication
+                            :id
+                            (#'persist/post-feed (-> request :params :tags flatten vec) (-> request :params :value))) "success")
   (GET "/tags" [request] (wrap-json-response tags)))
 
