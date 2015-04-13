@@ -20,13 +20,6 @@
   )
 
 
-(defn notify [sid number msg]
-  (prn @subscribers)
-  (let [receiver (get @subscribers [sid number] nil)]
-    (swap! subscribers #(dissoc %1 %2) [sid number])
-    (if receiver
-      (send! receiver (response {:msg msg}))
-      nil)))
 
 (defn api-streams-post
   "Post a new event to a stream"

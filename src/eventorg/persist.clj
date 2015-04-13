@@ -16,9 +16,11 @@
 (defn get-feed
   "get the feed for a selected user"
   [user-id]
+  (prn "Get feed request for user " user-id)
   (let [conn (bitemyapp.revise.connection/connect)]
     (-> (r/db db-name)
         (r/table-db "events")
-        (r/filter {:id user-id})
+        (r/filter {:user user-id})
         (r/limit 20)
-        (run conn))))
+        (run conn)
+        :response)))

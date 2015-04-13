@@ -6,11 +6,12 @@
             [ring.util.response :as response])
   (:require [cemerick.friend :as friend]
             (cemerick.friend [workflows :as workflows]
-                             [credentials :as creds])))
+                             [credentials :as creds]))
+  (:require [eventorg.persist :as persist]))
 
 (defn get-feed
   [user]
-  (response (str user)))
+  )
 
 (defn tags [abc]
   (response ["test1" "test2" "alarm" "mail" "urgent" "github" "etc"]))
@@ -19,6 +20,10 @@
 
 
 (defroutes user-routes*
-  (GET "/feed" [request] (response (friend/identity request) ))
+  (GET "/feed" request  (response
+                         (-> (friend/identity request)
+                            friend/current-authentication
+                            :id
+                            (#'persist/get-feed))))
   (GET "/tags" [request] (wrap-json-response tags)))
 

@@ -42,7 +42,8 @@
 (def tusers {"root" {:username "root"
                     :password (creds/hash-bcrypt "admin_password")
                     :roles #{::admin}}
-            "jane" {:username "jane"
+            "jane" {:id "e926cb1c-7d7e-4fbf-9433-09f3b00cf976"
+                    :username "jane"
                     :password (creds/hash-bcrypt "jane")
                     :roles #{::user}}})
 
@@ -54,16 +55,13 @@
                                         home))
   (GET "/login" request login-page)
   (friend/logout (GET "/logout" [] (ring.util.response/redirect "/")))
-  (context "/api" []
-    (context "/streams" [] #'stream*)
-    (context "/user" [] (-> #'user/user-routes*
+  (context "/api" request
+           (context "/user" request (-> #'user/user-routes*
                          (wrap-json-response)
                          (friend/wrap-authorize #{::user})))
     )
   (compojure.route/resources "/")
   (compojure.route/not-found "Sorry, nothing here..."))
-
-(creds/bcrypt-credential-fn  tusers {:username "jane" :password "jane"})
 
 
 
