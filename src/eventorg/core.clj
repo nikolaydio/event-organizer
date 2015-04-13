@@ -22,11 +22,14 @@
 (use 'org.httpkit.server)
 
 
-(def home
+(def board
   (response/resource-response "board.html"))
 
 
 (def login-page
+  (response/resource-response "welcome.html"))
+
+(def home
   (response/resource-response "welcome.html"))
 
 
@@ -46,15 +49,16 @@
 (derive ::admin ::user)
 
 (defroutes app-unsecure*
-  (GET "/" request home)
+  (GET "/" request (if (friend/identity request)
+                                        board
+                                        home))
   (GET "/login" request login-page)
-  (GET "/authorized" request
-       (prn request)
-       (response (friend/identity request)))
   (friend/logout (GET "/logout" [] (ring.util.response/redirect "/")))
   (context "/api" []
     (context "/streams" [] #'stream*)
-    (context "/user" [] (friend/wrap-authorize #'user/user-routes* #{::user}))
+    (context "/user" [] (-> #'user/user-routes*
+                         (wrap-json-response)
+                         (friend/wrap-authorize #{::user})))
     )
   (compojure.route/resources "/")
   (compojure.route/not-found "Sorry, nothing here..."))
