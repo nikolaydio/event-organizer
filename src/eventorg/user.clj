@@ -9,11 +9,8 @@
                              [credentials :as creds]))
   (:require [eventorg.persist :as persist]))
 
-(defn get-feed
-  [user]
-  )
 
-(defn tags [abc]
+(defn tags []
   (response ["test1" "test2" "alarm" "mail" "urgent" "github" "etc"]))
 
 
@@ -29,5 +26,5 @@
                             friend/current-authentication
                             :id
                             (#'persist/post-feed (-> request :params :tags flatten vec) (-> request :params :value))) "success")
-  (GET "/tags" [request] (wrap-json-response tags)))
+  (GET "/tags" request  (tags)))
 
