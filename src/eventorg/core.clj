@@ -1,5 +1,5 @@
 (ns eventorg.core
-  (:use [compojure.core :only (GET PUT POST defroutes context)])
+  (:use [compojure.core :only (GET PUT POST ANY defroutes context)])
   (:use [ring.middleware.json :only [wrap-json-response wrap-json-body]]
         [ring.util.response :only [response]]
         [ring.middleware.session])
@@ -42,9 +42,9 @@
 (def tusers {"root" {:username "root"
                     :password (creds/hash-bcrypt "admin_password")
                     :roles #{::admin}}
-            "jane" {:id "e926cb1c-7d7e-4fbf-9433-09f3b00cf976"
-                    :username "jane"
-                    :password (creds/hash-bcrypt "jane")
+            "niki" {:id "e926cb1c-7d7e-4fbf-9433-09f3b00cf976"
+                    :username "niki"
+                    :password (creds/hash-bcrypt "niki")
                     :roles #{::user}}})
 
 (derive ::admin ::user)
@@ -54,7 +54,7 @@
                                         board
                                         home))
   (GET "/login" request login-page)
-  (friend/logout (GET "/logout" [] (ring.util.response/redirect "/")))
+  (friend/logout (ANY "/logout" [] (ring.util.response/redirect "/")))
   (context "/api" request
            (context "/user" request (-> #'user/user-routes*
                          (wrap-json-response)

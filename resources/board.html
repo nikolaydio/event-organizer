@@ -24,11 +24,13 @@
                         <a class="navbar-brand" href="#">EventOrganizer</a>
                     </div>
                     <div id="navbar" class="navbar-collapse collapse">
-                        <form action="/logout" method="GET" class="navbar-form navbar-right">
+                        <div class="navbar-form navbar-right">
                             <button type="submit" class="btn btn-info">Write</button>
                             <button type="submit" class="btn btn-info">Streams</button>
-                            <button type="submit" class="btn btn-warning"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span></button>
-                        </form>
+                            <form action="/logout" method="POST" style="display:inline-block">
+                                <button type="submit" class="btn btn-warning"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span></button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </nav>
