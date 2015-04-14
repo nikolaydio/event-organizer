@@ -22,11 +22,14 @@
 (use 'org.httpkit.server)
 
 
-(def home
+(def board
   (response/resource-response "board.html"))
 
 
 (def login-page
+  (response/resource-response "welcome.html"))
+
+(def home
   (response/resource-response "welcome.html"))
 
 
@@ -39,27 +42,26 @@
 (def tusers {"root" {:username "root"
                     :password (creds/hash-bcrypt "admin_password")
                     :roles #{::admin}}
-            "jane" {:username "jane"
+            "jane" {:id "e926cb1c-7d7e-4fbf-9433-09f3b00cf976"
+                    :username "jane"
                     :password (creds/hash-bcrypt "jane")
                     :roles #{::user}}})
 
 (derive ::admin ::user)
 
 (defroutes app-unsecure*
-  (GET "/" request home)
+  (GET "/" request (if (friend/identity request)
+                                        board
+                                        home))
   (GET "/login" request login-page)
-  (GET "/authorized" request
-       (prn request)
-       (response (friend/identity request)))
   (friend/logout (GET "/logout" [] (ring.util.response/redirect "/")))
-  (context "/api" []
-    (context "/streams" [] #'stream*)
-    (context "/user" [] (friend/wrap-authorize #'user/user-routes* #{::user}))
+  (context "/api" request
+           (context "/user" request (-> #'user/user-routes*
+                         (wrap-json-response)
+                         (friend/wrap-authorize #{::user})))
     )
   (compojure.route/resources "/")
   (compojure.route/not-found "Sorry, nothing here..."))
-
-(creds/bcrypt-credential-fn  tusers {:username "jane" :password "jane"})
 
 
 
