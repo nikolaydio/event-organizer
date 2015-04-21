@@ -87,7 +87,7 @@ $(document).ready(function(){
 
     //Updating tags
   function update_tags() {
-    $.get(host + "/api/users/" + user + "/tags").then(function(data) {
+    $.get(host + "/api/user/tags").then(function(data) {
       console.log(data);
       var tags = $("#tags");
       tags.empty();
@@ -110,7 +110,7 @@ $(document).ready(function(){
   }
   update_tags();
 
-
+S
 
     $("#send-event").click(function(){
       $.post("/api/streams/" + $("#stream-id").val(),

@@ -1,5 +1,5 @@
 (ns eventorg.core
-  (:use [compojure.core :only (GET PUT POST defroutes context)])
+  (:use [compojure.core :only (GET PUT POST ANY defroutes context)])
   (:use [ring.middleware.json :only [wrap-json-response wrap-json-body]]
         [ring.util.response :only [response]]
         [ring.middleware.session])
@@ -14,7 +14,8 @@
             [ring.util.response :as response]
             [compojure.handler :as handler]
             [eventorg.stream :as stream]
-            [eventorg.user :as user])
+            [eventorg.user :as user]
+            [eventorg.persist :as persist])
   (:require [cemerick.friend :as friend]
             (cemerick.friend [workflows :as workflows]
                              [credentials :as creds])))
@@ -32,6 +33,14 @@
 (def home
   (response/resource-response "welcome.html"))
 
+(defn register-page [r]
+  (prn "Register request for username " (-> r :params :username))
+  (let [{user :username pass :password} (-> r :params)]
+    (if (== (:errors (persist/create-user user pass)) 0)
+        (ring.util.response/redirect "/login")
+        (ring.util.response/redirect "/signup"))))
+
+
 
 (defroutes stream*
   (POST "/" [] "creating stream")
@@ -42,9 +51,9 @@
 (def tusers {"root" {:username "root"
                     :password (creds/hash-bcrypt "admin_password")
                     :roles #{::admin}}
-            "jane" {:id "e926cb1c-7d7e-4fbf-9433-09f3b00cf976"
-                    :username "jane"
-                    :password (creds/hash-bcrypt "jane")
+            "niki" {:id "e926cb1c-7d7e-4fbf-9433-09f3b00cf976"
+                    :username "niki"
+                    :password (creds/hash-bcrypt "niki")
                     :roles #{::user}}})
 
 (derive ::admin ::user)
@@ -54,7 +63,8 @@
                                         board
                                         home))
   (GET "/login" request login-page)
-  (friend/logout (GET "/logout" [] (ring.util.response/redirect "/")))
+  (POST "/signup" request (register-page request))
+  (friend/logout (ANY "/logout" [] (ring.util.response/redirect "/")))
   (context "/api" request
            (context "/user" request (-> #'user/user-routes*
                          (wrap-json-response)
@@ -63,7 +73,11 @@
   (compojure.route/resources "/")
   (compojure.route/not-found "Sorry, nothing here..."))
 
-
+(defn login-function [args]
+  (let [{user :username pass :password} args]
+    (if-let [user-data (persist/check-user user pass)]
+        (assoc user-data :roles #{::user})
+        nil)))
 
 (def app* (handler/site
            (friend/authenticate
@@ -72,7 +86,7 @@
              :login-uri "/login"
              :default-landing-uri "/"
              :unauthorized-handler #("Logged in?")
-             :credential-fn #(creds/bcrypt-credential-fn tusers %)
+             :credential-fn login-function
              :workflows [(workflows/interactive-form)]})))
 
 (use '[ring.adapter.jetty :only (run-jetty)])

@@ -16,6 +16,32 @@
 (def db-name "eventorg")
 
 
+
+(defn check-user [user pass]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (let [data (-> (r/db db-name)
+                  (r/table "users")
+                  (r/filter {:username user :password pass})
+                  (r/run conn))]
+          (if (empty? data)
+            nil
+            (first data)))))
+
+(defn create-user [user pass]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (->  (r/branch  (-> (r/db db-name)
+                       (r/table "users")
+                       (r/filter {:username user})
+                       (r/count)
+                       (r/eq 0))
+                  (-> (r/db db-name)
+                      (r/table "users")
+                      (r/insert {:username user
+                                 :password pass} ))
+                   {:errors 1})
+        (r/run conn))))
+
+
 (comment
   (defn get-feed
   "get the feed for a selected user"
