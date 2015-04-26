@@ -19,7 +19,7 @@ $(document).ready(function(){
 
 
   update_content_data();
-  setInterval(update_content_data,50000);
+  setInterval(update_content_data,5000);
 
   //adding new messages
   $("#send-msg").click(function(){
