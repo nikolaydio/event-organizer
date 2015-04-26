@@ -27,7 +27,10 @@
                             :id
                             (#'persist/post-feed (-> request :params :tags flatten vec) (-> request :params :value))) "success")
   (GET "/streams" request "ABC")
-  (POST "/streams" request "ABC")
+  (POST "/streams" request (prn request) (persist/create-stream (-> (friend/identity request)
+                                                      friend/current-authentication
+                                                      :id)
+                                                  (-> request :params :tags flatten vec)))
   (PUT "/streams/:id" request "ABC")
   (DELETE "/streams/:id" request "ABC")
   (GET "/hooks" request "ABC")

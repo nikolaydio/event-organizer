@@ -103,6 +103,7 @@
 (defn create-stream
   "Create a new stream for a selected user"
   [user-id tags]
+  (prn "Creating stream with id " user-id "and tags" tags)
   (let [conn (connect :host "127.0.0.1" :port 28015)]
     (-> (r/db db-name)
         (r/table "streams")
@@ -110,4 +111,19 @@
                    :tags tags
                    :subpubhubbub []
                    :url ""} )
+        (r/run conn))))
+
+(defn stream-post
+  "Post to a stream with id"
+  [stream-id data]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "streams")
+        (r/get stream-id)
+        (r/pluck ["tags", "user"])
+        (r/merge {:value data
+                  :time (r/now)})
+        (r/do (r/fn [doc] (-> (r/db db-name)
+                              (r/table "events")
+                              (r/insert doc))))
         (r/run conn))))
