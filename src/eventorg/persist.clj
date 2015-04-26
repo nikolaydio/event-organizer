@@ -98,3 +98,16 @@
                    :tags tags
                    :value value} )
         (r/run conn))))
+
+
+(defn create-stream
+  "Create a new stream for a selected user"
+  [user-id tags]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "streams")
+        (r/insert {:user user-id
+                   :tags tags
+                   :subpubhubbub []
+                   :url ""} )
+        (r/run conn))))

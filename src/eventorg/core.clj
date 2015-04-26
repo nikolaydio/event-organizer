@@ -42,11 +42,15 @@
 
 
 
-(defroutes stream*
+(comment (defroutes stream*
   (POST "/" [] "creating stream")
   (GET "/:id" { params :form-params } (wrap-json-response #'stream/api-streams-get))
   (POST "/:id" { params :form-params } (wrap-json-response #'stream/api-streams-post))
-  (comment (GET "/:id/event/:seq" request (wrap-json-response #'stream/api-streams-get-event))))
+  (comment (GET "/:id/event/:seq" request (wrap-json-response #'stream/api-streams-get-event)))))
+
+(defroutes stream*
+  (POST "/:id" request "POSTING")
+  (GET "/:id" request "GET POSTING"))
 
 (def tusers {"root" {:username "root"
                     :password (creds/hash-bcrypt "admin_password")
@@ -69,7 +73,7 @@
            (context "/user" request (-> #'user/user-routes*
                          (wrap-json-response)
                          (friend/wrap-authorize #{::user})))
-    )
+           (context "/stream" request #'stream*))
   (compojure.route/resources "/")
   (compojure.route/not-found "Sorry, nothing here..."))
 

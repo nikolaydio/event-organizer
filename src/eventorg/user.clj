@@ -1,5 +1,5 @@
 (ns eventorg.user
-  (:use [compojure.core :only (GET PUT POST defroutes context)])
+  (:use [compojure.core :only (GET PUT POST DELETE defroutes context)])
   (:use [ring.middleware.json :only [wrap-json-response wrap-json-body]]
         [ring.util.response :only [response]])
   (:require (compojure handler route)
@@ -26,5 +26,13 @@
                             friend/current-authentication
                             :id
                             (#'persist/post-feed (-> request :params :tags flatten vec) (-> request :params :value))) "success")
+  (GET "/streams" request "ABC")
+  (POST "/streams" request "ABC")
+  (PUT "/streams/:id" request "ABC")
+  (DELETE "/streams/:id" request "ABC")
+  (GET "/hooks" request "ABC")
+  (POST "/hooks" request "ABC")
+  (PUT "/hooks/:id" request "ABC")
+  (DELETE "/hooks/:id" request "ABC")
   (GET "/tags" request  (tags)))
 
