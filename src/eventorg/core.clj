@@ -1,6 +1,6 @@
 (ns eventorg.core
   (:use [compojure.core :only (GET PUT POST ANY defroutes context)])
-  (:use [ring.middleware.json :only [wrap-json-response wrap-json-body]]
+  (:use [ring.middleware.json :only [wrap-json-response wrap-json-body wrap-json-params]]
         [ring.util.response :only [response]]
         [ring.middleware.session])
   (:use [ring.middleware params
@@ -48,9 +48,11 @@
   (POST "/:id" { params :form-params } (wrap-json-response #'stream/api-streams-post))
   (comment (GET "/:id/event/:seq" request (wrap-json-response #'stream/api-streams-get-event)))))
 
+(defn stream-post-f [request]
+
 (defroutes stream*
-  (ANY "/:id" request (persist/stream-post (-> request :params :id)
-                                           (-> request :params (dissoc :id)))))
+  (ANY "/:id" request (wrap-json-params (persist/stream-post (-> request :params :id)
+                                           (-> request :params (dissoc :id)))) {"good" "ABC"}))
 
 (def tusers {"root" {:username "root"
                     :password (creds/hash-bcrypt "admin_password")
