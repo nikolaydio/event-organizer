@@ -10,10 +10,6 @@
   (:require [eventorg.persist :as persist]))
 
 
-(defn tags []
-  (response ["test1" "test2" "alarm" "mail" "urgent" "github" "etc"]))
-
-
 
 (#'persist/list-streams "34e698ff-378c-4c5f-b1d5-e356d06c6292")
 
@@ -43,5 +39,9 @@
   (GET "/hooks" request "ABC")
   (POST "/hooks" request "ABC")
   (DELETE "/hooks/:id" request "ABC")
-  (GET "/tags" request  (tags)))
+  (GET "/tags" request  (-> (friend/identity request)
+                            friend/current-authentication
+                            :id
+                            (#'persist/get-user-tags)
+                            response)))
 

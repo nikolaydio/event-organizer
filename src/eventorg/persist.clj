@@ -16,6 +16,16 @@
 (def db-name "eventorg")
 
 
+(defn get-user-tags [user-id]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "events")
+        (r/filter {:user user-id} )
+        (r/concat-map (r/fn [doc]
+                     (r/get-field doc :tags)))
+        (r/distinct)
+        (r/run conn))))
+
 
 (defn check-user [user pass]
   (let [conn (connect :host "127.0.0.1" :port 28015)]

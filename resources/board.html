@@ -28,15 +28,12 @@
                 pointer-events: auto;
             }
             .modalDialog > div {
-                width: 400px;
+                width: 800px;
                 position: relative;
                 margin: 10% auto;
                 padding: 5px 20px 13px 20px;
                 border-radius: 10px;
                 background: #fff;
-                background: -moz-linear-gradient(#fff, #999);
-                background: -webkit-linear-gradient(#fff, #999);
-                background: -o-linear-gradient(#fff, #999);
             }
 
 
@@ -76,11 +73,11 @@
                 <div class="col-md-4">
                     <div class="panel panel-primary">
                         <div class="panel-heading">Context</div>
-                        <div class="panel-body">
+                        <div class="panel-body" style="overflow:hidden;">
                             <h4>Selected</h4>
-                            <div id="selected-tags"></div>
+                            <div id="selected-tags" style="overflow:hidden;"></div>
                             <h4>Available</h4>
-                            <div id="tags"></div>
+                            <div id="tags" style="overflow:hidden;"></div>
                         </div>
                     </div>
                 </div>

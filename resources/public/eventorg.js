@@ -2,7 +2,7 @@ $(document).ready(function(){
   "use strict"
 
   //General access data
-  var access_string = "http://93.155.146.63/";
+  var access_string = "http://93.155.146.63";
   var host = "";//"http://private-5ee78-eventorg.apiary-mock.com";
   var loaded_msgs = [];
 
@@ -90,7 +90,7 @@ $(document).ready(function(){
       var tags = $("#tags");
       tags.empty();
       $.each(data, function(index, value) {
-        var tag = $("<span class=\"label label-primary\" style=margin-left:5px>").text(value);
+        var tag = $("<span class=\"label label-primary\" style='display: inline-block;margin-left:5px'>").text(value);
         var move_to_selected = function() {
           tag.click(move_to_other);
           $("#selected-tags").append(tag);
@@ -115,9 +115,9 @@ $(document).ready(function(){
     $("#stream-list-container").empty();
     $.each(data, function(index, value) {
       var tag = $("<p>");
-      tag.append($("<span>").text(access_string + "/api/streams/" + value.id));
-      tag.append($("<span>").text(value.tags));
-      tag.append($("<span style='margin: 5px'>").click(function() {
+      tag.append($("<span>").text(access_string + "/api/stream/" + value.id));
+      tag.append($("<span style='padding: 5px'>").text(value.tags));
+      tag.append($("<span style='padding: 5px'>").click(function() {
         tag.remove();
         $.ajax({ url: host + "/api/user/streams/" + value.id,
                 method: "DELETE"} ).then(function() {
