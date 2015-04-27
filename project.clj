@@ -9,7 +9,8 @@
                  [http-kit "2.1.18"]
                  [revise "0.0.6"]
                  [com.cemerick/friend "0.2.1"]
-                 [rethinkdb "0.4.39"]]
+                 [rethinkdb "0.4.39"]
+                 [clj-http "1.1.1"]]
   :main ^:skip-aot eventorg.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})

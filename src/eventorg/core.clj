@@ -49,7 +49,7 @@
   (comment (GET "/:id/event/:seq" request (wrap-json-response #'stream/api-streams-get-event)))))
 
 (defn stream-post-f [request]
-  (persist/stream-post (-> request :params :id)
+  (persist/run-request (-> request :params :id)
                        (-> request :params (dissoc :id))))
 
 (defroutes stream*

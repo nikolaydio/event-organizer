@@ -12,8 +12,10 @@
 
 (require '[rethinkdb.core :refer [connect close]])
 (require '[rethinkdb.query :as r])
+(require '[org.httpkit.client :as http])
 
 (def db-name "eventorg")
+
 
 
 (defn get-user-tags [user-id]
@@ -159,7 +161,6 @@
                               (r/insert doc))))
         (r/run conn))))
 
-
 (defn create-hook
   "Create a new hook for a selected user"
   [user-id data]
@@ -189,3 +190,36 @@
                    :id hook-id} )
         (r/delete)
         (r/run conn))))
+
+(defn user-from-stream
+  [stream-id]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "streams")
+        (r/filter {:id stream-id} )
+        (r/pluck ["user"])
+        (r/run conn))))
+
+
+
+(defn test-rules [rules data]
+  true
+  )
+(defn dispatch-f [dispatch data]
+  (prn dispatch)
+  (http/post (-> dispatch :url)))
+
+
+(defn run-request [stream-id data]
+  (let [user-id (:user (first (user-from-stream stream-id)))
+        hooks (list-hooks user-id)]
+    (loop [v hooks]
+      (when v
+        (let [elem (first v)]
+          (do
+            (prn elem)
+            (when (test-rules (:rules elem) data)
+                (dispatch-f (:dispatch elem) data))
+            (recur (next v))))
+      )))
+  (stream-post stream-id data))
