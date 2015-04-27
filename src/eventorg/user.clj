@@ -36,9 +36,19 @@
                                       friend/current-authentication
                                       :id
                                       (#'persist/delete-stream (-> request :params :id))))
-  (GET "/hooks" request "ABC")
-  (POST "/hooks" request "ABC")
-  (DELETE "/hooks/:id" request "ABC")
+  (GET "/hooks" request (-> (friend/identity request)
+                            friend/current-authentication
+                            :id
+                            (#'persist/list-hooks)
+                            response))
+  (POST "/hooks" request (persist/create-hook (-> (friend/identity request)
+                                                      friend/current-authentication
+                                                      :id)
+                                                  (-> request :params)))
+  (DELETE "/hooks/:id" request (-> (friend/identity request)
+                                      friend/current-authentication
+                                      :id
+                                      (#'persist/delete-hook (-> request :params :id))))
   (GET "/tags" request  (-> (friend/identity request)
                             friend/current-authentication
                             :id

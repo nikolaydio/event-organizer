@@ -96,6 +96,8 @@
                    :value value} )
         (run conn)))))
 
+(defn post-feed [user-id tags value]
+  "DENIED")
 (defn post-feed
   "post a new event to a selected user's feed. Does not verify user id"
   [user-id tags value]
@@ -155,4 +157,35 @@
         (r/do (r/fn [doc] (-> (r/db db-name)
                               (r/table "events")
                               (r/insert doc))))
+        (r/run conn))))
+
+
+(defn create-hook
+  "Create a new hook for a selected user"
+  [user-id data]
+  (prn "Creating hook for id " user-id "and data" data)
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "hooks")
+        (r/insert (assoc data :user user-id) )
+        (r/run conn))))
+
+(defn list-hooks
+  "Return the all user hooks by id"
+  [user-id]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "hooks")
+        (r/filter {:user user-id} )
+        (r/run conn))))
+
+(defn delete-hook
+  "Delete hook with certain id if user-id has access to it"
+  [user-id hook-id]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "hooks")
+        (r/filter {:user user-id
+                   :id hook-id} )
+        (r/delete)
         (r/run conn))))

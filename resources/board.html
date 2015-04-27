@@ -116,9 +116,25 @@
         <div id="hooks-manager" class="modalDialog">
             <div>
                 <a href="#close" title="Close" class="close">X</a>
-                <h2>Modal Box</h2>
-                <p>This is a sample modal box that can be created using the powers of CSS3.</p>
-                <p>You could do a lot of things here like have a pop-up ad that shows when your website loads, or create a login/register form for users.</p>
+                <h2>Hooks List</h2>
+                <div id="hook-list-container">
+                </div>
+                <p>Match rules<p>
+                <table id="match-list-container">
+                    <tr><th>Field</th><th>Regex</th></tr>
+
+                </table>
+                <span style="display:block;" id="new-match-entry" class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                <p>Dispatch rule</p>
+                <select id="dispatch-type">
+                  <option value="post">POST request</option>
+                </select>
+                <div id="dispatch-list-container">
+                    URL: <input id="webhook-url" type="text" />
+                    Content: <input id="webhook-content" type="text" />
+
+                </div>
+                <input type="button" id="create-hook" value="Create hook" />
             </div>
         </div>
 

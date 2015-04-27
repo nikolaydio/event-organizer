@@ -146,4 +146,56 @@ $(document).ready(function(){
     });
   });
 
+
+
+  //HOOK MANAGEMENT
+  function render_hooks_list(data) {
+    $("#hook-list-container").empty();
+    $.each(data, function(index, value) {
+      var tag = $("<p>");
+      tag.append($("<span>").text(value.type));
+      tag.append($("<span style='padding: 5px'>").text(value.rules));
+      tag.append($("<span style='padding: 5px'>").text(value.dispatch));
+      tag.append($("<span style='padding: 5px'>").click(function() {
+        tag.remove();
+        $.ajax({ url: host + "/api/user/hooks/" + value.id,
+                method: "DELETE"} ).then(function() {
+        });
+      }).text("X"));
+      $("#hook-list-container").append(tag);
+    });
+  }
+  function update_hooks_list() {
+    $.get(host +"api/user/hooks").then(function(data) {
+      render_hooks_list(data);
+    });
+  }
+
+  $("#new-match-entry").click(function() {
+    $("#match-list-container").append(
+      $("<tr>")
+        .append($("<td>").append($("<input>")))
+        .append($("<td>").append($("<input>"))));
+  });
+  $("#create-hook").click(function() {
+    var rules = [];
+    var elems = $("#match-list-container").find("input");
+    for(var i = 0; i < elems.length; i+=2) {
+      rules.push({"field": elems[i].value, "value": elems[i+1].value});
+    }
+    var dispatch_type = $("#dispatch-type").val();
+    if(dispatch_type == "post") {
+      var url = $("#webhook-url").val();
+      var ctnt = $("#webhook-content").val();
+      console.log("About to post");
+      $.post(host + "/api/user/hooks", {"rules": rules, "type": dispatch_type, "dispatch": {"url": url, "content": ctnt}}).then(function() {
+        update_hooks_list();
+      });
+    }
+    console.log(rules);
+  });
+  $("#toggle-hooks").click(function() {
+    update_hooks_list();
+  });
+
 });
