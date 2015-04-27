@@ -12,9 +12,21 @@
 
 (require '[rethinkdb.core :refer [connect close]])
 (require '[rethinkdb.query :as r])
+(require '[org.httpkit.client :as http])
 
 (def db-name "eventorg")
 
+
+
+(defn get-user-tags [user-id]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "events")
+        (r/filter {:user user-id} )
+        (r/concat-map (r/fn [doc]
+                     (r/get-field doc :tags)))
+        (r/distinct)
+        (r/run conn))))
 
 
 (defn check-user [user pass]
@@ -86,6 +98,8 @@
                    :value value} )
         (run conn)))))
 
+(defn post-feed [user-id tags value]
+  "DENIED")
 (defn post-feed
   "post a new event to a selected user's feed. Does not verify user id"
   [user-id tags value]
@@ -98,3 +112,114 @@
                    :tags tags
                    :value value} )
         (r/run conn))))
+
+
+(defn create-stream
+  "Create a new stream for a selected user"
+  [user-id tags]
+  (prn "Creating stream with id " user-id "and tags" tags)
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "streams")
+        (r/insert {:user user-id
+                   :tags tags} )
+        (r/run conn))))
+
+(defn list-streams
+  "Return the all user streams by id"
+  [user-id]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "streams")
+        (r/filter {:user user-id} )
+        (r/run conn))))
+
+(defn delete-stream
+  "Delete stream with certain id if user-id has access to it"
+  [user-id stream-id]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "streams")
+        (r/filter {:user user-id
+                   :id stream-id} )
+        (r/delete)
+        (r/run conn))))
+
+
+(defn stream-post
+  "Post to a stream with id"
+  [stream-id data]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "streams")
+        (r/get stream-id)
+        (r/pluck ["tags", "user"])
+        (r/merge {:value data
+                  :time (r/now)})
+        (r/do (r/fn [doc] (-> (r/db db-name)
+                              (r/table "events")
+                              (r/insert doc))))
+        (r/run conn))))
+
+(defn create-hook
+  "Create a new hook for a selected user"
+  [user-id data]
+  (prn "Creating hook for id " user-id "and data" data)
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "hooks")
+        (r/insert (assoc data :user user-id) )
+        (r/run conn))))
+
+(defn list-hooks
+  "Return the all user hooks by id"
+  [user-id]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "hooks")
+        (r/filter {:user user-id} )
+        (r/run conn))))
+
+(defn delete-hook
+  "Delete hook with certain id if user-id has access to it"
+  [user-id hook-id]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "hooks")
+        (r/filter {:user user-id
+                   :id hook-id} )
+        (r/delete)
+        (r/run conn))))
+
+(defn user-from-stream
+  [stream-id]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "streams")
+        (r/filter {:id stream-id} )
+        (r/pluck ["user"])
+        (r/run conn))))
+
+
+
+(defn test-rules [rules data]
+  true
+  )
+(defn dispatch-f [dispatch data]
+  (prn dispatch)
+  (http/post (-> dispatch :url)))
+
+
+(defn run-request [stream-id data]
+  (let [user-id (:user (first (user-from-stream stream-id)))
+        hooks (list-hooks user-id)]
+    (loop [v hooks]
+      (when v
+        (let [elem (first v)]
+          (do
+            (prn elem)
+            (when (test-rules (:rules elem) data)
+                (dispatch-f (:dispatch elem) data))
+            (recur (next v))))
+      )))
+  (stream-post stream-id data))

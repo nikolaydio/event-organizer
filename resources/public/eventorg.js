@@ -2,10 +2,8 @@ $(document).ready(function(){
   "use strict"
 
   //General access data
+  var access_string = "http://93.155.146.63";
   var host = "";//"http://private-5ee78-eventorg.apiary-mock.com";
-  var user = "dfb9153d-2172-41ba-900b-8f56106f6dc7";
-  var read_stream = "dfb9153d-2172-41ba-900b-8f56106f6dc7";
-  var write_stream = "f3be18bf-408f-451f-8d10-e2fee82bb1a9";
   var loaded_msgs = [];
 
   //Updating data in data explorer
@@ -92,7 +90,7 @@ $(document).ready(function(){
       var tags = $("#tags");
       tags.empty();
       $.each(data, function(index, value) {
-        var tag = $("<span class=\"label label-primary\" style=margin-left:5px>").text(value);
+        var tag = $("<span class=\"label label-primary\" style='display: inline-block;margin-left:5px'>").text(value);
         var move_to_selected = function() {
           tag.click(move_to_other);
           $("#selected-tags").append(tag);
@@ -110,27 +108,94 @@ $(document).ready(function(){
   }
   update_tags();
 
-S
 
-    $("#send-event").click(function(){
-      $.post("/api/streams/" + $("#stream-id").val(),
-        {
-          msg: $("#event-text").val()
-        }
-      ).done(function(data) {
-        console.log(data);
-      });
-    });
 
-  $("#refresh-events").click(function() {
-    $.get("/api/stream/" + $("#stream-id").val(),
-          {}
-    ).done(function(data){
-      $("#events").empty();
-      console.log(data);
-      $.each(data, function(key, entry) {
-        $("#events").append($("<p>").text(entry));
-      });
+  //STREAM MANAGEMENT CODE
+  function render_streams_list(data) {
+    $("#stream-list-container").empty();
+    $.each(data, function(index, value) {
+      var tag = $("<p>");
+      tag.append($("<span>").text(access_string + "/api/stream/" + value.id));
+      tag.append($("<span style='padding: 5px'>").text(value.tags));
+      tag.append($("<span style='padding: 5px'>").click(function() {
+        tag.remove();
+        $.ajax({ url: host + "/api/user/streams/" + value.id,
+                method: "DELETE"} ).then(function() {
+        });
+      }).text("X"));
+      $("#stream-list-container").append(tag);
     });
-  })
+  }
+  function update_streams_list() {
+    $.get(host + "/api/user/streams").then(function(data) {
+        render_streams_list(data);
+    });
+  }
+
+  //attach to toggling button to refresh list
+  $("#toggle-streams").click(function() {
+    update_streams_list();
+  });
+
+  $("#add-stream").click(function() {
+    var tags = $("#new-stream-tags").val();
+    $("#new-stream-tags").text("");
+    var tag_list = tags.split(",");
+    $.post(host + "/api/user/streams", {tags: tag_list}).then(function(data) {
+      update_streams_list();
+    });
+  });
+
+
+
+  //HOOK MANAGEMENT
+  function render_hooks_list(data) {
+    $("#hook-list-container").empty();
+    $.each(data, function(index, value) {
+      var tag = $("<p>");
+      tag.append($("<span>").text(value.type));
+      tag.append($("<span style='padding: 5px'>").text(value.rules));
+      tag.append($("<span style='padding: 5px'>").text(value.dispatch));
+      tag.append($("<span style='padding: 5px'>").click(function() {
+        tag.remove();
+        $.ajax({ url: host + "/api/user/hooks/" + value.id,
+                method: "DELETE"} ).then(function() {
+        });
+      }).text("X"));
+      $("#hook-list-container").append(tag);
+    });
+  }
+  function update_hooks_list() {
+    $.get(host +"api/user/hooks").then(function(data) {
+      render_hooks_list(data);
+    });
+  }
+
+  $("#new-match-entry").click(function() {
+    $("#match-list-container").append(
+      $("<tr>")
+        .append($("<td>").append($("<input>")))
+        .append($("<td>").append($("<input>"))));
+  });
+  $("#create-hook").click(function() {
+    var rules = [];
+    var elems = $("#match-list-container").find("input");
+    for(var i = 0; i < elems.length; i+=2) {
+      rules.push({"field": elems[i].value, "value": elems[i+1].value});
+    }
+    var dispatch_type = $("#dispatch-type").val();
+    if(dispatch_type == "post") {
+      var url = $("#webhook-url").val();
+      var ctnt = $("#webhook-content").val();
+      console.log("About to post");
+      $.post(host + "/api/user/hooks", {"rules": rules, "type": dispatch_type, "dispatch": {"url": url, "content": ctnt}}).then(function() {
+        update_hooks_list();
+      });
+    }
+    console.log(rules);
+  });
+  $("#toggle-hooks").click(function() {
+    update_hooks_list();
+  });
+
 });

@@ -1,6 +1,6 @@
 (ns eventorg.core
   (:use [compojure.core :only (GET PUT POST ANY defroutes context)])
-  (:use [ring.middleware.json :only [wrap-json-response wrap-json-body]]
+  (:use [ring.middleware.json :only [wrap-json-response wrap-json-body wrap-json-params]]
         [ring.util.response :only [response]]
         [ring.middleware.session])
   (:use [ring.middleware params
@@ -42,11 +42,18 @@
 
 
 
-(defroutes stream*
+(comment (defroutes stream*
   (POST "/" [] "creating stream")
   (GET "/:id" { params :form-params } (wrap-json-response #'stream/api-streams-get))
   (POST "/:id" { params :form-params } (wrap-json-response #'stream/api-streams-post))
-  (comment (GET "/:id/event/:seq" request (wrap-json-response #'stream/api-streams-get-event))))
+  (comment (GET "/:id/event/:seq" request (wrap-json-response #'stream/api-streams-get-event)))))
+
+(defn stream-post-f [request]
+  (persist/run-request (-> request :params :id)
+                       (-> request :params (dissoc :id))))
+
+(defroutes stream*
+  (ANY "/:id" request (wrap-json-params stream-post-f)))
 
 (def tusers {"root" {:username "root"
                     :password (creds/hash-bcrypt "admin_password")
@@ -69,7 +76,7 @@
            (context "/user" request (-> #'user/user-routes*
                          (wrap-json-response)
                          (friend/wrap-authorize #{::user})))
-    )
+           (context "/stream" request #'stream*))
   (compojure.route/resources "/")
   (compojure.route/not-found "Sorry, nothing here..."))
 
