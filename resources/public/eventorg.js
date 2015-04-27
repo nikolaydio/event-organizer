@@ -2,10 +2,8 @@ $(document).ready(function(){
   "use strict"
 
   //General access data
+  var access_string = "http://93.155.146.63/";
   var host = "";//"http://private-5ee78-eventorg.apiary-mock.com";
-  var user = "dfb9153d-2172-41ba-900b-8f56106f6dc7";
-  var read_stream = "dfb9153d-2172-41ba-900b-8f56106f6dc7";
-  var write_stream = "f3be18bf-408f-451f-8d10-e2fee82bb1a9";
   var loaded_msgs = [];
 
   //Updating data in data explorer
@@ -110,27 +108,42 @@ $(document).ready(function(){
   }
   update_tags();
 
-S
 
-    $("#send-event").click(function(){
-      $.post("/api/streams/" + $("#stream-id").val(),
-        {
-          msg: $("#event-text").val()
-        }
-      ).done(function(data) {
-        console.log(data);
-      });
-    });
 
-  $("#refresh-events").click(function() {
-    $.get("/api/stream/" + $("#stream-id").val(),
-          {}
-    ).done(function(data){
-      $("#events").empty();
-      console.log(data);
-      $.each(data, function(key, entry) {
-        $("#events").append($("<p>").text(entry));
-      });
+  //STREAM MANAGEMENT CODE
+  function render_streams_list(data) {
+    $("#stream-list-container").empty();
+    $.each(data, function(index, value) {
+      var tag = $("<p>");
+      tag.append($("<span>").text(access_string + "/api/streams/" + value.id));
+      tag.append($("<span>").text(value.tags));
+      tag.append($("<span style='margin: 5px'>").click(function() {
+        tag.remove();
+        $.ajax({ url: host + "/api/user/streams/" + value.id,
+                method: "DELETE"} ).then(function() {
+        });
+      }).text("X"));
+      $("#stream-list-container").append(tag);
     });
-  })
+  }
+  function update_streams_list() {
+    $.get(host + "/api/user/streams").then(function(data) {
+        render_streams_list(data);
+    });
+  }
+
+  //attach to toggling button to refresh list
+  $("#toggle-streams").click(function() {
+    update_streams_list();
+  });
+
+  $("#add-stream").click(function() {
+    var tags = $("#new-stream-tags").val();
+    $("#new-stream-tags").text("");
+    var tag_list = tags.split(",");
+    $.post(host + "/api/user/streams", {tags: tag_list}).then(function(data) {
+      update_streams_list();
+    });
+  });
+
 });

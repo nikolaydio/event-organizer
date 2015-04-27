@@ -9,6 +9,38 @@
         <script src="js/bootstrap.min.js"></script>
 
         <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <style>
+            .modalDialog {
+                position: fixed;
+                font-family: Arial, Helvetica, sans-serif;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                background: rgba(0,0,0,0.8);
+                z-index: 99999;
+                opacity:0;
+                pointer-events: none;
+            }
+            .modalDialog:target {
+                opacity:1;
+                pointer-events: auto;
+            }
+            .modalDialog > div {
+                width: 400px;
+                position: relative;
+                margin: 10% auto;
+                padding: 5px 20px 13px 20px;
+                border-radius: 10px;
+                background: #fff;
+                background: -moz-linear-gradient(#fff, #999);
+                background: -webkit-linear-gradient(#fff, #999);
+                background: -o-linear-gradient(#fff, #999);
+            }
+
+
+        </style>
     </head>
     <body>
         <div class="container">
@@ -26,8 +58,12 @@
                     <div id="navbar" class="navbar-collapse collapse">
                         <div class="navbar-form navbar-right">
                             <button type="submit" id="toggle-write" class="btn btn-info">Write</button>
-                            <button type="submit" id="toggle-hooks" class="btn btn-info">Hooks</button>
-                            <button type="submit" id="toggle-streams" class="btn btn-info">Streams</button>
+                            <form action="#hooks-manager" style="display:inline-block">
+                                <button type="submit" id="toggle-hooks" class="btn btn-info">Hooks</button>
+                            </form>
+                            <form action="#streams-manager" style="display:inline-block">
+                                <button type="submit" id="toggle-streams" class="btn btn-info">Streams</button>
+                            </form>
                             <form action="/logout" method="POST" style="display:inline-block">
                                 <button type="submit" class="btn btn-warning"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span></button>
                             </form>
@@ -68,6 +104,25 @@
                 </div>
             </div>
 
+        </div>
+
+        <div id="streams-manager" class="modalDialog">
+            <div>
+                <a href="#close" title="Close" class="close">X</a>
+                <h2>Streams List</h2>
+                <div id="stream-list-container">
+                </div>
+                <input type="text" id="new-stream-tags" /><span id="add-stream" class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+            </div>
+        </div>
+
+        <div id="hooks-manager" class="modalDialog">
+            <div>
+                <a href="#close" title="Close" class="close">X</a>
+                <h2>Modal Box</h2>
+                <p>This is a sample modal box that can be created using the powers of CSS3.</p>
+                <p>You could do a lot of things here like have a pop-up ad that shows when your website loads, or create a login/register form for users.</p>
+            </div>
         </div>
 
         <hr>

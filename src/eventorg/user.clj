@@ -15,6 +15,7 @@
 
 
 
+(#'persist/list-streams "34e698ff-378c-4c5f-b1d5-e356d06c6292")
 
 (defroutes user-routes*
   (GET "/feed" request  (response
@@ -26,16 +27,21 @@
                             friend/current-authentication
                             :id
                             (#'persist/post-feed (-> request :params :tags flatten vec) (-> request :params :value))) "success")
-  (GET "/streams" request "ABC")
-  (POST "/streams" request (prn request) (persist/create-stream (-> (friend/identity request)
+  (GET "/streams" request (-> (friend/identity request)
+                            friend/current-authentication
+                            :id
+                            (#'persist/list-streams)
+                            response))
+  (POST "/streams" request (prn "Create stream request") (persist/create-stream (-> (friend/identity request)
                                                       friend/current-authentication
                                                       :id)
                                                   (-> request :params :tags flatten vec)))
-  (PUT "/streams/:id" request "ABC")
-  (DELETE "/streams/:id" request "ABC")
+  (DELETE "/streams/:id" request (-> (friend/identity request)
+                                      friend/current-authentication
+                                      :id
+                                      (#'persist/delete-stream (-> request :params :id))))
   (GET "/hooks" request "ABC")
   (POST "/hooks" request "ABC")
-  (PUT "/hooks/:id" request "ABC")
   (DELETE "/hooks/:id" request "ABC")
   (GET "/tags" request  (tags)))
 

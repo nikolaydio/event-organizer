@@ -49,10 +49,11 @@
   (comment (GET "/:id/event/:seq" request (wrap-json-response #'stream/api-streams-get-event)))))
 
 (defn stream-post-f [request]
+  (persist/stream-post (-> request :params :id)
+                       (-> request :params (dissoc :id))))
 
 (defroutes stream*
-  (ANY "/:id" request (wrap-json-params (persist/stream-post (-> request :params :id)
-                                           (-> request :params (dissoc :id)))) {"good" "ABC"}))
+  (ANY "/:id" request (wrap-json-params stream-post-f)))
 
 (def tusers {"root" {:username "root"
                     :password (creds/hash-bcrypt "admin_password")

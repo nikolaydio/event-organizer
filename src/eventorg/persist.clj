@@ -108,10 +108,29 @@
     (-> (r/db db-name)
         (r/table "streams")
         (r/insert {:user user-id
-                   :tags tags
-                   :subpubhubbub []
-                   :url ""} )
+                   :tags tags} )
         (r/run conn))))
+
+(defn list-streams
+  "Return the all user streams by id"
+  [user-id]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "streams")
+        (r/filter {:user user-id} )
+        (r/run conn))))
+
+(defn delete-stream
+  "Delete stream with certain id if user-id has access to it"
+  [user-id stream-id]
+  (let [conn (connect :host "127.0.0.1" :port 28015)]
+    (-> (r/db db-name)
+        (r/table "streams")
+        (r/filter {:user user-id
+                   :id stream-id} )
+        (r/delete)
+        (r/run conn))))
+
 
 (defn stream-post
   "Post to a stream with id"
