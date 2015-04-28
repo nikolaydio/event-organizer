@@ -98,8 +98,7 @@
                    :value value} )
         (run conn)))))
 
-(defn post-feed [user-id tags value]
-  "DENIED")
+
 (defn post-feed
   "post a new event to a selected user's feed. Does not verify user id"
   [user-id tags value]
@@ -201,9 +200,22 @@
         (r/run conn))))
 
 
+(require '[clojure.string :as str])
 
+
+(defn test-single-rule [rule data]
+  (prn rule)
+  (let [fields (str/split (:field rule) #".")
+        fields (if (empty? fields) [(keyword (:field rule))] fields)]
+    (prn (:value rule) data fields)
+    (let [va (get-in data fields nil)]
+      (if va
+        (= va (:value rule))
+        false)
+  )))
 (defn test-rules [rules data]
-  true
+  (when (every? #(#'test-single-rule (second (vec %1)) data) rules)
+        true)
   )
 (defn dispatch-f [dispatch data]
   (prn dispatch)
@@ -218,7 +230,7 @@
         (let [elem (first v)]
           (do
             (prn elem)
-            (when (test-rules (:rules elem) data)
+            (when (#'test-rules (:rules elem) data)
                 (dispatch-f (:dispatch elem) data))
             (recur (next v))))
       )))
