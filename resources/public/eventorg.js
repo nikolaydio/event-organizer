@@ -38,7 +38,8 @@ $(document).ready(function(){
     if(elem.value.msg != null) {
       add = elem.value.msg;
     }else{
-      add = elem.value;
+      add = elem.value.toSource();
+      //console.log(elem.value);
     }
     jq.text(add);
     $.each(elem.tags, function(index, v) {
@@ -154,8 +155,15 @@ $(document).ready(function(){
     $.each(data, function(index, value) {
       var tag = $("<p>");
       tag.append($("<span>").text(value.type));
-      tag.append($("<span style='padding: 5px'>").text(value.rules));
-      tag.append($("<span style='padding: 5px'>").text(value.dispatch));
+
+      var rules_list = $.map(value.rules, function(value, index) {
+          return value;
+      });
+
+      console.log(rules_list);
+
+      tag.append($("<span style='padding: 5px'>").text(rules_list.toSource()));
+      tag.append($("<span style='padding: 5px'>").text(value.dispatch.toSource()));
       tag.append($("<span style='padding: 5px'>").click(function() {
         tag.remove();
         $.ajax({ url: host + "/api/user/hooks/" + value.id,
@@ -187,12 +195,17 @@ $(document).ready(function(){
     if(dispatch_type == "post") {
       var url = $("#webhook-url").val();
       var ctnt = $("#webhook-content").val();
-      console.log("About to post");
-      $.post(host + "/api/user/hooks", {"rules": rules, "type": dispatch_type, "dispatch": {"url": url, "content": ctnt}}).then(function() {
+      console.log("About to post", rules);
+      var to_send = {"rules": rules, "type": dispatch_type, "dispatch": {"url": url, "content": ctnt}};
+      $.ajax({
+        url: host + "/api/user/hooks",
+        type: "POST",
+        //contentType: "application/json",
+        data: to_send
+      }).then(function() {
         update_hooks_list();
-      });
+      });;
     }
-    console.log(rules);
   });
   $("#toggle-hooks").click(function() {
     update_hooks_list();
