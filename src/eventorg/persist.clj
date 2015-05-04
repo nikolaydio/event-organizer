@@ -206,36 +206,62 @@
 
 (require '[clojure.string :as str])
 
+(defn strkey-to-keywords [strkey]
+  (map keyword (str/split strkey #"\.")))
+
+(defn deesc [string]
+  (str/replace string #"\\\\" "\\"))
+
+(re-pattern "\\w+")
 
 (defn test-single-rule [rule data]
-  (prn rule)
-  (let [fields (str/split (:field rule) #".")
-        fields (if (empty? fields) [(keyword (:field rule))] fields)]
-    (prn (:value rule) data fields)
+  (prn "Rule" rule)
+  (let [fields (strkey-to-keywords (:field rule))]
+    (prn "Field list" fields)
     (let [va (get-in data fields nil)]
-      (if va
-        (= va (:value rule))
-        false)
+      (prn va (:value rule))
+      (when va
+        (-> rule
+            :value
+            re-pattern
+            (re-matches va)))
   )))
-(defn test-rules [rules data]
-  (when (every? #(#'test-single-rule (second (vec %1)) data) rules)
-        true)
-  )
-(defn dispatch-f [dispatch data]
-  (prn dispatch)
-  (http/post (-> dispatch :url)))
 
+(defn test-rules [rules data]
+  (every? #(#'test-single-rule (second (vec %1)) data) rules))
+
+(defn get-replace-string [string data]
+  (let [ keyword-list (-> (str/replace string #"%" "")
+                           strkey-to-keywords) ]
+    (get-in data keyword-list ":field not present:")))
+
+(defn replace-content [content data]
+  (let [special (re-seq #"%[\w\.]+%" content)]
+      (reduce #(str/replace %1 %2 (get-replace-string %2 data)) content special)))
+
+
+(defn dispatch-f [dispatch data]
+  (prn "Dispatching " dispatch)
+  (when dispatch
+    (when (:url dispatch)
+      (http/post (-> dispatch :url) {:body (replace-content (:content dispatch "") data)}))))
 
 (defn run-request [stream-id data]
   (let [user-id (:user (first (user-from-stream stream-id)))
         hooks (list-hooks user-id)]
+    (stream-post stream-id data)
+    (prn hooks)
     (loop [v hooks]
       (when v
         (let [elem (first v)]
-          (do
-            (prn elem)
+          (when elem
             (when (#'test-rules (:rules elem) data)
                 (dispatch-f (:dispatch elem) data))
             (recur (next v))))
-      )))
-  (stream-post stream-id data))
+      ))))
+
+(prn "abc")
+(reduce #(do (prn "abc" %1 %2) (+ %1 %2)) [1 2 3 4])
+(if nil "a" "b")
+(first [])
+(str/split "hellowod" #"\.")

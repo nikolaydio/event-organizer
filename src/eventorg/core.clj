@@ -50,7 +50,8 @@
 
 (defn stream-post-f [request]
   (persist/run-request (-> request :params :id)
-                       (-> request :params (dissoc :id))))
+                       (-> request :params (dissoc :id)))
+{:status 200  :headers {}   :body {:success :true}})
 
 (defroutes stream*
   (ANY "/:id" request (wrap-json-params stream-post-f)))

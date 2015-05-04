@@ -155,18 +155,24 @@ $(document).ready(function(){
   //HOOK MANAGEMENT
   function render_hooks_list(data) {
     $("#hook-list-container").empty();
+    console.log("TIME");
     $.each(data, function(index, value) {
       var tag = $("<p>");
       tag.append($("<span>").text(value.type));
 
-      var rules_list = $.map(value.rules, function(value, index) {
-          return value;
-      });
+      var rules_list=[];
+      if(value.rules) {
+        $.each(value.rules, function(i,n) {
+            rules_list.push(n);
+        });
+      }
 
-      console.log(rules_list);
+      console.log(value);
 
       tag.append($("<span style='padding: 5px'>").text(rules_list.toSource()));
-      tag.append($("<span style='padding: 5px'>").text(value.dispatch.toSource()));
+      if(value.dispatch) {
+        tag.append($("<span style='padding: 5px'>").text(value.dispatch.toSource()));
+      }
       tag.append($("<span style='padding: 5px'>").click(function() {
         tag.remove();
         $.ajax({ url: host + "/api/user/hooks/" + value.id,
@@ -190,9 +196,9 @@ $(document).ready(function(){
   });
   $("#create-hook").click(function() {
     var rules = [];
-    var elems = $("#match-list-container").find("input");
-    for(var i = 0; i < elems.length; i+=2) {
-      rules.push({"field": elems[i].value, "value": elems[i+1].value});
+    var elemens = $("#match-list-container").find("input");
+    for(var i = 0; i < elemens.length; i+=2) {
+      rules.push({"field": elemens[i].value, "value": elemens[i+1].value});
     }
     var dispatch_type = $("#dispatch-type").val();
     if(dispatch_type == "post") {
