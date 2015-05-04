@@ -8,7 +8,8 @@ $(document).ready(function(){
 
   //Updating data in data explorer
   function update_content_data() {
-    $.get(host + "/api/user/feed").then(function(data) {
+    console.log(get_tags());
+    $.get(host + "/api/user/feed", {"tags": get_tags()}).then(function(data) {
       loaded_msgs = data;
       render_data();
     })
@@ -96,11 +97,13 @@ $(document).ready(function(){
           tag.click(move_to_other);
           $("#selected-tags").append(tag);
           render_data();
+          update_content_data();
         };
         var move_to_other = function() {
           tag.click(move_to_selected);
           tags.append(tag);
           render_data();
+          update_content_data();
         };
         tag.click(move_to_selected);
         tags.append(tag);

@@ -73,12 +73,16 @@
 
 (defn get-feed
   "get the feed for a selected user"
-  [user-id]
+  [user-id tags]
   (prn "Get feed request for user " user-id)
   (let [conn (connect :host "127.0.0.1" :port 28015)]
     (-> (r/db db-name)
         (r/table "events")
         (r/filter {:user user-id})
+        (r/filter
+          (r/fn [row]
+            (-> (r/set-intersection (r/get-field row :tags) tags)
+                (r/eq tags))))
         (r/order-by (r/desc "time"))
         (r/without [:user :time])
         (r/limit 20)

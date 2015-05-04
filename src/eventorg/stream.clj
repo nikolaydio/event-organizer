@@ -60,5 +60,3 @@
       (prn resp)
       (response (first (:response resp))))))
 
-
-(def abc "abc")

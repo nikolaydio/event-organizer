@@ -18,7 +18,7 @@
                          (-> (friend/identity request)
                             friend/current-authentication
                             :id
-                            (#'persist/get-feed))))
+                            (#'persist/get-feed (-> request :params (get :tags []))))))
   (POST "/feed" request  (-> (friend/identity request)
                             friend/current-authentication
                             :id
